@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Prints — Katman Katman Tasarım Mağazası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#111319;
+    --surface:#1b1e27;
+    --surface-2:#242835;
+    --line: rgba(237,238,242,0.09);
+    --text:#edeef2;
+    --muted:#9195a3;
+    --orange:#ff5a1f;
+    --orange-dim: rgba(255,90,31,0.14);
+    --teal:#00c2a8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  button{font-family:inherit;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 5vw;
+    backdrop-filter:blur(10px);
+    background:rgba(17,19,25,0.78);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:20px; letter-spacing:-0.02em;
+    display:flex; align-items:center; gap:8px;
+    text-decoration:none;
+  }
+  .logo span{color:var(--orange);}
+  nav.nav-links ul{list-style:none; display:flex; gap:34px; margin:0; padding:0;}
+  nav.nav-links a{
+    font-size:14px; color:var(--muted); text-decoration:none;
+    transition:color .2s;
+  }
+  nav.nav-links a:hover{color:var(--text);}
+  .nav-right{display:flex; align-items:center; gap:14px;}
+  .icon-btn{
+    background:none; border:1px solid var(--line); color:var(--text);
+    width:38px; height:38px; border-radius:10px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s, background .15s;
+  }
+  .icon-btn:hover{border-color:rgba(237,238,242,0.3); background:rgba(237,238,242,0.04);}
+  .cart-count{
+    position:absolute; top:-6px; right:-6px; background:var(--orange); color:#12131a;
+    font-size:10px; font-weight:700; width:16px; height:16px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .icon-wrap{position:relative;}
+  .nav-cta{
+    background:var(--orange); color:#12131a; font-weight:600; font-size:14px;
+    padding:10px 20px; border-radius:999px; text-decoration:none; border:none; cursor:pointer;
+    transition:transform .15s, box-shadow .15s;
+  }
+  .nav-cta:hover{transform:translateY(-1px); box-shadow:0 8px 24px var(--orange-dim);}
+  .burger{
+    display:none; background:none; border:1px solid var(--line); color:var(--text);
+    width:40px; height:40px; border-radius:10px; cursor:pointer;
+    flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  }
+  .burger span{width:18px; height:2px; background:var(--text); display:block;}
+  .mobile-menu{
+    display:none; position:fixed; top:64px; left:0; right:0; bottom:0; z-index:99;
+    background:var(--ink); padding:32px 6vw; overflow-y:auto;
+  }
+  .mobile-menu.open{display:block;}
+  .mobile-menu a{
+    display:block; padding:18px 0; border-bottom:1px solid var(--line);
+    color:var(--text); text-decoration:none; font-size:18px; font-family:'Space Grotesk',sans-serif;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:92vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding:150px 5vw 80px;
+    position:relative; overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,90,31,0.035) 0px, rgba(255,90,31,0.035) 1px, transparent 1px, transparent 28px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--orange);
+    letter-spacing:0.12em; text-transform:uppercase; margin-bottom:22px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:""; width:8px; height:8px; border-radius:50%; background:var(--teal);
+    box-shadow:0 0 0 4px rgba(0,194,168,0.15);
+  }
+  .stack-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(42px, 7.5vw, 96px);
+    line-height:0.98;
+    letter-spacing:-0.03em;
+    margin:0 0 26px;
+    max-width:18ch;
+    text-shadow:
+      0 1px 0 #2a2e3a, 0 2px 0 #262a35, 0 3px 0 #232631, 0 4px 0 #1f222c,
+      0 5px 0 #1c1e27, 0 6px 0 #181a22, 0 7px 0 #14161d, 0 10px 22px rgba(0,0,0,0.55);
+  }
+  .stack-title em{
+    font-style:normal; color:var(--orange);
+    text-shadow:
+      0 1px 0 #8f2f10, 0 2px 0 #7d290e, 0 3px 0 #6c220c, 0 4px 0 #5a1c0a,
+      0 5px 0 #481608, 0 6px 0 #361006, 0 10px 22px rgba(255,90,31,0.35);
+  }
+  .hero p.lede{ font-size:18px; color:var(--muted); max-width:54ch; line-height:1.65; margin:0 0 40px; }
+  .hero-actions{display:flex; gap:16px; flex-wrap:wrap; margin-bottom:64px;}
+  .btn-primary{
+    background:var(--orange); color:#12131a; font-weight:600; font-size:15px;
+    padding:15px 28px; border-radius:10px; text-decoration:none; border:none;
+    cursor:pointer; transition:transform .15s, box-shadow .15s; display:inline-block;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 10px 30px var(--orange-dim);}
+  .btn-secondary{
+    background:transparent; color:var(--text); font-weight:500; font-size:15px;
+    padding:15px 28px; border-radius:10px; text-decoration:none;
+    border:1px solid var(--line); transition:border-color .15s, background .15s; cursor:pointer;
+  }
+  .btn-secondary:hover{border-color:rgba(237,238,242,0.3); background:rgba(237,238,242,0.03);}
+  .specs-row{ display:flex; gap:0; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:28px; max-width:760px; }
+  .spec{padding:0 28px 0 0; margin-right:28px; border-right:1px solid var(--line);}
+  .spec:last-child{border-right:none;}
+  .spec .val{font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:500;}
+  .spec .lbl{font-size:12px; color:var(--muted); margin-top:4px;}
+
+  /* ---------- SECTION SHARED ---------- */
+  section{padding:100px 5vw;}
+  .section-head{max-width:660px; margin-bottom:52px;}
+  .section-tag{
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal);
+    text-transform:uppercase; letter-spacing:0.12em; margin-bottom:14px;
+  }
+  .section-head h2{
+    font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,42px);
+    letter-spacing:-0.02em; margin:0 0 14px; font-weight:600;
+  }
+  .section-head p{color:var(--muted); font-size:16px; line-height:1.6; margin:0;}
+
+  /* ---------- 3D INFO ---------- */
+  .info-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:56px; align-items:start;}
+  .info-visual{
+    aspect-ratio:1/1; border-radius:20px; border:1px solid var(--line);
+    background:
+      repeating-linear-gradient(180deg, var(--surface) 0px, var(--surface) 6px, var(--surface-2) 6px, var(--surface-2) 7px);
+    position:relative; overflow:hidden;
+  }
+  .info-visual .layer-badge{
+    position:absolute; bottom:20px; left:20px; background:rgba(17,19,25,0.85);
+    border:1px solid var(--line); border-radius:10px; padding:12px 16px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--teal);
+  }
+  .info-list{display:flex; flex-direction:column; gap:28px;}
+  .info-item{border-top:1px solid var(--line); padding-top:20px;}
+  .info-item h3{font-family:'Space Grotesk',sans-serif; font-size:18px; margin:0 0 8px; font-weight:600;}
+  .info-item p{color:var(--muted); font-size:14.5px; line-height:1.65; margin:0;}
+
+  /* ---------- PRODUCTS ---------- */
+  .filter-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px;}
+  .filter-chip{
+    background:var(--surface); border:1px solid var(--line); color:var(--muted);
+    padding:9px 18px; border-radius:999px; font-size:13px; cursor:pointer; transition:all .15s;
+  }
+  .filter-chip.active{background:var(--orange); border-color:var(--orange); color:#12131a; font-weight:600;}
+  .product-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:24px;}
+  .product-card{
+    background:var(--surface); border:1px solid var(--line); border-radius:16px; overflow:hidden;
+    display:flex; flex-direction:column; transition:border-color .2s, transform .2s;
+  }
+  .product-card:hover{border-color:rgba(237,238,242,0.25); transform:translateY(-3px);}
+  .product-thumb{
+    aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--muted);
+    position:relative;
+  }
+  .product-body{padding:20px 20px 22px; display:flex; flex-direction:column; gap:10px; flex:1;}
+  .product-cat{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--teal); text-transform:uppercase; letter-spacing:0.08em;}
+  .product-name{font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:600;}
+  .product-desc{color:var(--muted); font-size:13px; line-height:1.55; flex:1;}
+  .product-footer{display:flex; align-items:center; justify-content:space-between; margin-top:6px;}
+  .product-price{font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:500;}
+  .add-btn{
+    background:var(--surface-2); border:1px solid var(--line); color:var(--text);
+    padding:9px 16px; border-radius:8px; font-size:13px; cursor:pointer; font-weight:500;
+    transition:background .15s, border-color .15s;
+  }
+  .add-btn:hover{background:var(--orange); border-color:var(--orange); color:#12131a;}
+
+  /* ---------- CONTACT ---------- */
+  .contact-wrap{
+    display:grid; grid-template-columns:1fr 1fr; gap:40px;
+    background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:48px;
+  }
+  .contact-item{display:flex; align-items:flex-start; gap:16px; text-decoration:none; color:inherit;}
+  .contact-icon{
+    width:46px; height:46px; border-radius:12px; background:var(--surface-2);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    border:1px solid var(--line); transition:background .2s, border-color .2s;
+  }
+  .contact-item:hover .contact-icon{background:var(--orange); border-color:var(--orange);}
+  .contact-item:hover .contact-icon svg{stroke:#12131a;}
+  .contact-label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;}
+  .contact-value{font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:600;}
+
+  /* ---------- FOOTER ---------- */
+  footer{ padding:56px 5vw 36px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px; border-top:1px solid var(--line); }
+  footer .foot-left p{color:var(--muted); font-size:13px; margin:14px 0 0; max-width:36ch; line-height:1.6;}
+  .foot-links{display:flex; gap:26px; flex-wrap:wrap;}
+  .foot-links a{color:var(--muted); font-size:13px; text-decoration:none;}
+  .foot-links a:hover{color:var(--text);}
+
+  /* ---------- MODAL (auth) ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(9,10,14,0.7); z-index:200;
+    align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px);
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--surface); border:1px solid var(--line); border-radius:18px;
+    width:100%; max-width:420px; padding:36px; position:relative;
+  }
+  .modal-close{
+    position:absolute; top:18px; right:18px; background:none; border:none; color:var(--muted);
+    font-size:20px; cursor:pointer; line-height:1;
+  }
+  .auth-tabs{display:flex; gap:8px; margin-bottom:28px; background:var(--surface-2); border-radius:10px; padding:4px;}
+  .auth-tab{
+    flex:1; background:none; border:none; color:var(--muted); padding:10px; border-radius:8px;
+    font-size:14px; font-weight:600; cursor:pointer; transition:all .15s;
+  }
+  .auth-tab.active{background:var(--orange); color:#12131a;}
+  .modal h3{font-family:'Space Grotesk',sans-serif; font-size:22px; margin:0 0 6px; font-weight:600;}
+  .modal .sub{color:var(--muted); font-size:13.5px; margin:0 0 26px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px;}
+  .field input{
+    width:100%; background:var(--ink); border:1px solid var(--line); color:var(--text);
+    padding:12px 14px; border-radius:9px; font-size:14px; outline:none;
+    transition:border-color .15s;
+  }
+  .field input:focus{border-color:var(--orange);}
+  .auth-submit{
+    width:100%; background:var(--orange); color:#12131a; border:none; padding:14px;
+    border-radius:9px; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px;
+    transition:transform .15s;
+  }
+  .auth-submit:hover{transform:translateY(-1px);}
+  .auth-note{font-size:12px; color:var(--muted); margin-top:16px; text-align:center; line-height:1.6;}
+  .form-panel{display:none;}
+  .form-panel.active{display:block;}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--text); color:var(--ink); padding:14px 22px; border-radius:10px;
+    font-size:14px; font-weight:600; z-index:300; opacity:0; pointer-events:none;
+    transition:opacity .25s, transform .25s;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:900px){
+    nav.nav-links{display:none;}
+    .burger{display:flex;}
+    .info-grid{grid-template-columns:1fr;}
+    .product-grid{grid-template-columns:repeat(2,1fr);}
+    .contact-wrap{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    .product-grid{grid-template-columns:1fr;}
+    .specs-row{flex-direction:column; gap:16px;}
+    .spec{border-right:none; padding-right:0; margin-right:0;}
+    .contact-wrap{padding:32px 24px;}
+  }
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{transition:none !important;} }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo">3D<span>Prints</span></a>
+  <nav class="nav-links">
+    <ul>
+      <li><a href="#urunler">Ürünler</a></li>
+      <li><a href="#hakkinda">3D Baskı</a></li>
+      <li><a href="#iletisim">İletişim</a></li>
+    </ul>
+  </nav>
+  <div class="nav-right">
+    <div class="icon-wrap">
+      <button class="icon-btn" aria-label="Sepet" id="cartBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+      </button>
+      <span class="cart-count" id="cartCount">0</span>
+    </div>
+    <button class="nav-cta" id="openAuthBtn">Giriş / Kayıt</button>
+    <button class="burger" id="burgerBtn" aria-label="Menü">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#urunler">Ürünler</a>
+  <a href="#hakkinda">3D Baskı</a>
+  <a href="#iletisim">İletişim</a>
+  <a href="#" id="mobileAuthBtn">Giriş / Kayıt</a>
+</div>
+
+<section class="hero">
+  <div class="eyebrow">katman katman üretim</div>
+  <h1 class="stack-title">Tasarımı <em>gerçeğe</em> dönüştür.</h1>
+  <p class="lede">Fonksiyonel parçalardan kişiye özel hediyelere, dekoratif objelerden figürlere kadar; 3D tasarım ürünlerini keşfet, dosyanı yolla, biz katman katman bassın.</p>
+  <div class="hero-actions">
+    <a href="#urunler" class="btn-primary">Ürünleri Keşfet</a>
+    <a href="#hakkinda" class="btn-secondary">3D Baskı Nedir?</a>
+  </div>
+  <div class="specs-row">
+    <div class="spec"><div class="val">0.1mm</div><div class="lbl">katman hassasiyeti</div></div>
+    <div class="spec"><div class="val">24–72s</div><div class="lbl">üretim süresi</div></div>
+    <div class="spec"><div class="val">12+</div><div class="lbl">malzeme seçeneği</div></div>
+    <div class="spec"><div class="val">%100</div><div class="lbl">yerinde kontrol</div></div>
+  </div>
+</section>
+
+<section id="hakkinda">
+  <div class="section-head">
+    <div class="section-tag">3D baskı nedir</div>
+    <h2>Bir dosya, katman katman bir ürüne dönüşür.</h2>
+    <p>3D baskı (eklemeli üretim), dijital bir tasarımın ince katmanlar hâlinde üst üste basılarak fiziksel bir nesneye dönüştürülmesidir. Malzeme kesilip yontulmaz — sıfırdan, katman katman inşa edilir.</p>
+  </div>
+  <div class="info-grid">
+    <div class="info-visual">
+      <div class="layer-badge">~200 katman / parça</div>
+    </div>
+    <div class="info-list">
+      <div class="info-item">
+        <h3>Nasıl çalışır?</h3>
+        <p>3D model dilimlere ayrılır, yazıcı her dilimi ısıtılmış malzemeyle (filament veya reçine) alt alta ekleyerek nesneyi oluşturur.</p>
+      </div>
+      <div class="info-item">
+        <h3>Neden tercih edilir?</h3>
+        <p>Seri üretimde zor olan karmaşık geometriler, tek parça üretim ve kişiye özel ölçüler 3D baskıyla kolayca mümkün olur.</p>
+      </div>
+      <div class="info-item">
+        <h3>Hangi malzemeler kullanılır?</h3>
+        <p>PLA hassas detay ister, PETG dayanıklılık ve nem direnci sağlar, ABS yüksek ısıya dayanır, reçine ise en yüksek çözünürlüğü verir.</p>
+      </div>
+      <div class="info-item">
+        <h3>Kalite nasıl garanti edilir?</h3>
+        <p>Her parça basım sonrası elle kontrol edilir; gerekiyorsa zımparalanır, temizlenir ve boyanarak son haline getirilir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="urunler">
+  <div class="section-head">
+    <div class="section-tag">Mağaza</div>
+    <h2>3D tasarım ürünleri.</h2>
+    <p>Fonksiyonel, kişisel, dekoratif ve figür kategorilerinde öne çıkan ürünler.</p>
+  </div>
+  <div class="filter-row" id="filterRow">
+    <button class="filter-chip active" data-cat="all">Tümü</button>
+    <button class="filter-chip" data-cat="fonksiyonel">Fonksiyonel</button>
+    <button class="filter-chip" data-cat="kisisel">Kişiselleştirilmiş</button>
+    <button class="filter-chip" data-cat="dekoratif">Dekoratif</button>
+    <button class="filter-chip" data-cat="figur">Figür</button>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+</section>
+
+<section id="iletisim">
+  <div class="section-head">
+    <div class="section-tag">İletişim</div>
+    <h2>Sorularınız için bize ulaşın.</h2>
+    <p>Sipariş, özel tasarım ya da fiyat teklifi için telefon veya Instagram üzerinden yazabilirsiniz.</p>
+  </div>
+  <div class="contact-wrap">
+    <a href="tel:05555555555" class="contact-item">
+      <div class="contact-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      </div>
+      <div>
+        <div class="contact-label">Telefon</div>
+        <div class="contact-value">dayi kmin numarasını eklıyım</div>
+      </div>
+    </a>
+    <a href="https://instagram.com/canan.organik" target="_blank" rel="noopener" class="contact-item">
+      <div class="contact-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+      </div>
+      <div>
+        <div class="contact-label">Instagram</div>
+        <div class="contact-value">gtrk_tasarim3d</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-left">
+    <a href="#" class="logo">3D<span>Prints</span></a>
+    <p>Fonksiyonel parçalar, kişiselleştirilmiş ürünler, dekoratif objeler ve figürler için katman katman üretim atölyesi.</p>
+  </div>
+  <div class="foot-links">
+    <a href="#urunler">Ürünler</a>
+    <a href="#hakkinda">3D Baskı</a>
+    <a href="#iletisim">İletişim</a>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authOverlay">
+  <div class="modal">
+    <button class="modal-close" id="closeAuthBtn">&times;</button>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-form="login">Giriş Yap</button>
+      <button class="auth-tab" data-form="register">Kayıt Ol</button>
+    </div>
+
+    <div class="form-panel active" id="loginPanel">
+      <h3>Tekrar hoş geldin</h3>
+      <p class="sub">Hesabına giriş yap, siparişlerini takip et.</p>
+      <form id="loginForm">
+        <div class="field"><label>E-posta</label><input type="email" required placeholder="ornek@mail.com"></div>
+        <div class="field"><label>Şifre</label><input type="password" required placeholder="••••••••"></div>
+        <button type="submit" class="auth-submit">Giriş Yap</button>
+      </form>
+      <p class="auth-note">Bu form arayüz demosudur — gerçek giriş için bir backend/kimlik doğrulama servisine bağlanması gerekir.</p>
+    </div>
+
+    <div class="form-panel" id="registerPanel">
+      <h3>Hesap oluştur</h3>
+      <p class="sub">Bir dakikada kaydol, alışverişe başla.</p>
+      <form id="registerForm">
+        <div class="field"><label>Ad Soyad</label><input type="text" required placeholder="Adın Soyadın"></div>
+        <div class="field"><label>E-posta</label><input type="email" required placeholder="ornek@mail.com"></div>
+        <div class="field"><label>Şifre</label><input type="password" required placeholder="••••••••"></div>
+        <button type="submit" class="auth-submit">Kayıt Ol</button>
+      </form>
+      <p class="auth-note">Bu form arayüz demosudur — gerçek kayıt için bir backend/kimlik doğrulama servisine bağlanması gerekir.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---------- PRODUCT DATA ----------
+  const products = [
+    { name:"Modüler Duvar Rafı", cat:"fonksiyonel", price:"₺349", desc:"Vidasız montaj, dayanıklı PETG gövde." },
+    { name:"Kablo Düzenleyici Set", cat:"fonksiyonel", price:"₺129", desc:"Masa altı kablo yönetimi için 4'lü set." },
+    { name:"Telefon Standı", cat:"fonksiyonel", price:"₺179", desc:"Ayarlanabilir açı, kaymaz taban." },
+    { name:"İsme Özel Anahtarlık", cat:"kisisel", price:"₺99", desc:"Dilediğin ismi 3 boyutlu olarak işliyoruz." },
+    { name:"Kişiye Özel Mum Kabı", cat:"kisisel", price:"₺249", desc:"Tarih ve isim gravürlü, hediyelik kutu ile." },
+    { name:"Aile Figürü Standı", cat:"kisisel", price:"₺399", desc:"Fotoğraftan esinlenerek tasarlanan mini figür." },
+    { name:"Geometrik Vazo", cat:"dekoratif", price:"₺289", desc:"Katman dokusu belirgin, mat yüzey." },
+    { name:"Ay Fazlı Gece Lambası", cat:"dekoratif", price:"₺459", desc:"Yarı saydam reçine, sıcak LED uyumlu." },
+    { name:"Origami Duvar Paneli", cat:"dekoratif", price:"₺329", desc:"Modüler, birleştirilebilir duvar süsü." },
+    { name:"Ejder Figürü (Eklemli)", cat:"figur", price:"₺389", desc:"Hareketli eklemler, tek parça baskı." },
+    { name:"Koleksiyon Kahraman Figürü", cat:"figur", price:"₺349", desc:"Yüksek çözünürlüklü reçine baskı, el boyama." },
+    { name:"Mini Ejderha Ailesi", cat:"figur", price:"₺299", desc:"3 parçalık set, farklı renk seçenekleriyle." },
+  ];
+  const catLabels = { fonksiyonel:"Fonksiyonel", kisisel:"Kişiselleştirilmiş", dekoratif:"Dekoratif", figur:"Figür" };
+  const catColors = { fonksiyonel:"var(--orange)", kisisel:"var(--teal)", dekoratif:"var(--orange)", figur:"var(--teal)" };
+
+  const grid = document.getElementById('productGrid');
+  let cartCount = 0;
+
+  function renderProducts(filter){
+    grid.innerHTML = "";
+    products
+      .filter(p => filter === "all" || p.cat === filter)
+      .forEach(p => {
+        const card = document.createElement('div');
+        card.className = "product-card";
+        card.innerHTML = `
+          <div class="product-thumb" style="background:linear-gradient(135deg, var(--surface-2), var(--surface));">
+            <span style="color:${catColors[p.cat]}">${catLabels[p.cat]}</span>
+          </div>
+          <div class="product-body">
+            <div class="product-cat">${catLabels[p.cat]}</div>
+            <div class="product-name">${p.name}</div>
+            <div class="product-desc">${p.desc}</div>
+            <div class="product-footer">
+              <div class="product-price">${p.price}</div>
+              <button class="add-btn">Sepete Ekle</button>
+            </div>
+          </div>
+        `;
+        card.querySelector('.add-btn').addEventListener('click', () => {
+          cartCount++;
+          document.getElementById('cartCount').textContent = cartCount;
+          showToast(p.name + " sepete eklendi");
+        });
+        grid.appendChild(card);
+      });
+  }
+  renderProducts("all");
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      renderProducts(chip.dataset.cat);
+    });
+  });
+
+  // ---------- TOAST ----------
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+  document.getElementById('cartBtn').addEventListener('click', () => {
+    showToast(cartCount === 0 ? "Sepetin boş" : cartCount + " ürün sepette");
+  });
+
+  // ---------- AUTH MODAL ----------
+  const overlay = document.getElementById('authOverlay');
+  function openAuth(){ overlay.classList.add('open'); }
+  function closeAuth(){ overlay.classList.remove('open'); }
+  document.getElementById('openAuthBtn').addEventListener('click', openAuth);
+  document.getElementById('mobileAuthBtn').addEventListener('click', (e) => { e.preventDefault(); closeMobileMenu(); openAuth(); });
+  document.getElementById('closeAuthBtn').addEventListener('click', closeAuth);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeAuth(); });
+
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(tab.dataset.form + 'Panel').classList.add('active');
+    });
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast("Giriş başarılı (demo)");
+    closeAuth();
+  });
+  document.getElementById('registerForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    showToast("Kayıt başarılı (demo)");
+    closeAuth();
+  });
+
+  // ---------- MOBILE MENU ----------
+  const mobileMenu = document.getElementById('mobileMenu');
+  const burgerBtn = document.getElementById('burgerBtn');
+  function closeMobileMenu(){ mobileMenu.classList.remove('open'); }
+  burgerBtn.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => {
+    if(a.id !== 'mobileAuthBtn') a.addEventListener('click', closeMobileMenu);
+  });
+</script>
+
+</body>
+</html>

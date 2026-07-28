@@ -262,7 +262,7 @@
   .field label{display:block; font-size:13px; color:var(--muted); margin-bottom:7px;}
   .field input{
     width:100%; background:var(--ink); border:1px solid var(--line); color:var(--text);
-    padding:12px 14px; border-radius:9px; font-size:14px; outline:none;
+    padding:12px 14px; border-radius:99px; font-size:14px; outline:none;
     transition:border-color .15s;
   }
   .field input:focus{border-color:var(--orange);}
@@ -409,7 +409,7 @@
       </div>
       <div>
         <div class="contact-label">Telefon</div>
-        <div class="contact-value">dayi kmin numarasını eklıyım</div>
+        <div class="contact-value">0555 555 55 55</div>
       </div>
     </a>
     <a href="https://instagram.com/canan.organik" target="_blank" rel="noopener" class="contact-item">
@@ -436,7 +436,6 @@
   </div>
 </footer>
 
-<!-- AUTH MODAL -->
 <div class="modal-overlay" id="authOverlay">
   <div class="modal">
     <button class="modal-close" id="closeAuthBtn">&times;</button>
@@ -449,23 +448,21 @@
       <h3>Tekrar hoş geldin</h3>
       <p class="sub">Hesabına giriş yap, siparişlerini takip et.</p>
       <form id="loginForm">
-        <div class="field"><label>E-posta</label><input type="email" required placeholder="ornek@mail.com"></div>
-        <div class="field"><label>Şifre</label><input type="password" required placeholder="••••••••"></div>
+        <div class="field"><label>E-posta</label><input type="email" name="email" required placeholder="ornek@mail.com"></div>
+        <div class="field"><label>Şifre</label><input type="password" name="password" required placeholder="••••••••"></div>
         <button type="submit" class="auth-submit">Giriş Yap</button>
       </form>
-      <p class="auth-note">Bu form arayüz demosudur — gerçek giriş için bir backend/kimlik doğrulama servisine bağlanması gerekir.</p>
     </div>
 
     <div class="form-panel" id="registerPanel">
       <h3>Hesap oluştur</h3>
       <p class="sub">Bir dakikada kaydol, alışverişe başla.</p>
       <form id="registerForm">
-        <div class="field"><label>Ad Soyad</label><input type="text" required placeholder="Adın Soyadın"></div>
-        <div class="field"><label>E-posta</label><input type="email" required placeholder="ornek@mail.com"></div>
-        <div class="field"><label>Şifre</label><input type="password" required placeholder="••••••••"></div>
+        <div class="field"><label>Ad Soyad</label><input type="text" name="fullName" required placeholder="Adın Soyadın"></div>
+        <div class="field"><label>E-posta</label><input type="email" name="email" required placeholder="ornek@mail.com"></div>
+        <div class="field"><label>Şifre</label><input type="password" name="password" required placeholder="••••••••"></div>
         <button type="submit" class="auth-submit">Kayıt Ol</button>
       </form>
-      <p class="auth-note">Bu form arayüz demosudur — gerçek kayıt için bir backend/kimlik doğrulama servisine bağlanması gerekir.</p>
     </div>
   </div>
 </div>
@@ -541,7 +538,7 @@
     clearTimeout(window._toastTimer);
     window._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
   }
-  document.getElementById('cartBtn').addEventListener('click', () => {
+  document.getElementById('cartBtn')?.addEventListener('click', () => {
     showToast(cartCount === 0 ? "Sepetin boş" : cartCount + " ürün sepette");
   });
 
@@ -549,10 +546,10 @@
   const overlay = document.getElementById('authOverlay');
   function openAuth(){ overlay.classList.add('open'); }
   function closeAuth(){ overlay.classList.remove('open'); }
-  document.getElementById('openAuthBtn').addEventListener('click', openAuth);
-  document.getElementById('mobileAuthBtn').addEventListener('click', (e) => { e.preventDefault(); closeMobileMenu(); openAuth(); });
-  document.getElementById('closeAuthBtn').addEventListener('click', closeAuth);
-  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeAuth(); });
+  document.getElementById('openAuthBtn')?.addEventListener('click', openAuth);
+  document.getElementById('mobileAuthBtn')?.addEventListener('click', (e) => { e.preventDefault(); closeMobileMenu(); openAuth(); });
+  document.getElementById('closeAuthBtn')?.addEventListener('click', closeAuth);
+  overlay?.addEventListener('click', (e) => { if(e.target === overlay) closeAuth(); });
 
   document.querySelectorAll('.auth-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -563,51 +560,58 @@
     });
   });
 
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
+  document.getElementById('loginForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
     showToast("Giriş başarılı (demo)");
     closeAuth();
   });
- // --------- MOBILE MENU ---------
-const mobileMenu = document.getElementById('mobileMenu');
-const burgerBtn = document.getElementById('burgerBtn');
-function closeMobileMenu(){ mobileMenu.classList.remove('open'); }
-if(burgerBtn) burgerBtn.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-if(mobileMenu) {
-  mobileMenu.querySelectorAll('a').forEach(a => {
-    if(a.id !== 'mobileAuthBtn') a.addEventListener('click', closeMobileMenu);
-  });
-}
 
-// --------- FIREBASE KAYIT KODU ---------
-document.getElementById('registerForm')?.addEventListener('submit', (e) => {
-  e.preventDefault();
-  
-  const form = e.target;
-  const formData = new FormData(form);
-  const data = Object.fromEntries(formData.entries());
+  // --------- MOBILE MENU ---------
+  const mobileMenu = document.getElementById('mobileMenu');
+  const burgerBtn = document.getElementById('burgerBtn');
+  function closeMobileMenu(){ mobileMenu?.classList.remove('open'); }
+  if(burgerBtn) burgerBtn.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+  if(mobileMenu) {
+    mobileMenu.querySelectorAll('a').forEach(a => {
+      if(a.id !== 'mobileAuthBtn') a.addEventListener('click', closeMobileMenu);
+    });
+  }
 
-  fetch("https://tezyin-f664a-default-rtdb.firebaseio.com/kullanicilar.json", {
-    method: "POST",
-    body: JSON.stringify({
-      ...data,
-      tarih: new Date().toLocaleString("tr-TR")
-    }),
-    headers: { "Content-Type": "application/json" }
-  })
-  .then(res => {
-    if(res.ok) {
-      if (typeof showToast === "function") showToast("Kayıt veritabanına eklendi!");
-      form.reset();
-      if (typeof closeAuth === "function") closeAuth();
-    } else {
-      if (typeof showToast === "function") showToast("Bir hata oluştu!");
+  // --------- FIREBASE KAYIT KODU ----------
+  document.getElementById('registerForm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    // Şifre Denetimi
+    if (data.password && data.password.length < 6) {
+      showToast("Şifre en az 6 karakter olmalıdır!");
+      return;
     }
-  })
-  .catch(err => {
-    if (typeof showToast === "function") showToast("Bağlantı hatası!");
+
+    fetch("https://tezyin-f664a-default-rtdb.firebaseio.com/kullanicilar.json", {
+      method: "POST",
+      body: JSON.stringify({
+        ...data,
+        tarih: new Date().toLocaleString("tr-TR")
+      }),
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => {
+      if(res.ok) {
+        showToast("Kayıt veritabanına eklendi!");
+        form.reset();
+        closeAuth();
+      } else {
+        showToast("Bir hata oluştu!");
+      }
+    })
+    .catch(err => {
+      showToast("Bağlantı hatası!");
+    });
   });
-});
 </script>
 
 </body>

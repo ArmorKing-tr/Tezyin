@@ -568,10 +568,53 @@
     showToast("Giriş başarılı (demo)");
     closeAuth();
   });
-  document.getElementById('registerForm').addEventListener('submit', (e) => {
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+ const firebaseConfig = {
+    apiKey: "AIzaSyDCRRgQCFThfz6atbtHVZZby3ST5_MB484",
+    authDomain: "tezyin-f664a.firebaseapp.com",
+    databaseURL: "https://tezyin-f664a-default-rtdb.firebaseio.com",
+    projectId: "tezyin-f664a",
+    storageBucket: "tezyin-f664a.firebasestorage.app",
+    messagingSenderId: "654357846114",
+    appId: "1:654357846114:web:18361cb3cbbeecf4b8993b"
+  };
+
+  // Form Gönderildiğinde Firebase Realtime Database'e Kaydetme
+  document.getElementById('registerForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    showToast("Kayıt başarılı (demo)");
-    closeAuth();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    fetch("https://tezyin-f664a-default-rtdb.firebaseio.com/kullanicilar.json", {
+      method: "POST",
+      body: JSON.stringify({
+        ...data,
+        tarih: new Date().toLocaleString("tr-TR")
+      }),
+      headers: { "Content-Type": "application/json" }
+    })
+    .then(res => {
+      if(res.ok) {
+        if (typeof showToast === "function") showToast("Kayıt veritabanına eklendi!");
+        form.reset();
+        if (typeof closeAuth === "function") closeAuth();
+      } else {
+        if (typeof showToast === "function") showToast("Bir hata oluştu!");
+      }
+    })
+    .catch(err => {
+      if (typeof showToast === "function") showToast("Bağlantı hatası!");
+    });
   });
 
   // ---------- MOBILE MENU ----------
